@@ -1,16 +1,21 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import qs from "qs";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { setCategoryId, setCurrentPage } from "../redux/slices/filterSlice";
+import { setCategoryId, setCurrentPage, setFilters } from "../redux/slices/filterSlice";
 import Categories from "../components/Categories";
-import Sort from "../components/Sort";
+import Sort, { list } from "../components/Sort";
 import PizzaBlock from "../components/PizzaBlock";
 import Skeleton from "../components/PizzaBlock/Skeleton";
 import Pagination from "../components/Pagination";
 import { SearchContext } from "../App";
 
 export default function Home() {
+	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const isSearch = useRef(false);
+	const isMounted = useRef(false);
 	const { categoryId, sort, currentPage } = useSelector((state) => state.filter);
 	const sortType = sort.sortProperty;
 
@@ -26,7 +31,7 @@ export default function Home() {
 		dispatch(setCurrentPage(number));
 	};
 
-	useEffect(() => {
+	const fetchPizzas = () => {
 		setIsLoading(true);
 
 		const order = sortType.includes("-") ? "asc" : "desc";
@@ -42,7 +47,41 @@ export default function Home() {
 				setItems(res.data);
 				setIsLoading(false);
 			});
+	};
+
+	useEffect(() => {
+		if (isMounted.current) {
+			const queryString = qs.stringify({
+				sortProperty: sort.sortProperty,
+				categoryId,
+				currentPage,
+			});
+
+			navigate(`?${queryString}`);
+		}
+		isMounted.current = true;
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [categoryId, sortType, currentPage]);
+
+	useEffect(() => {
+		if (window.location.search) {
+			const params = qs.parse(window.location.search.substring(1));
+
+			const sort = list.find((obj) => obj.sortProperty === params.sortProperty);
+
+			dispatch(setFilters({ ...params, sort }));
+			isSearch.current = true;
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	useEffect(() => {
 		window.scrollTo(0, 0);
+		if (!isSearch.current) {
+			fetchPizzas();
+		}
+		isSearch.current = false;
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [categoryId, sortType, searchValue, currentPage]);
 
 	const pizzas = items
