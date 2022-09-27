@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useEffect, useContext, useRef } from "react";
 import qs from "qs";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setCategoryId, setCurrentPage, setFilters } from "../redux/slices/filterSlice";
@@ -10,6 +9,7 @@ import PizzaBlock from "../components/PizzaBlock";
 import Skeleton from "../components/PizzaBlock/Skeleton";
 import Pagination from "../components/Pagination";
 import { SearchContext } from "../App";
+import { fetchPizzas } from "../redux/slices/pizzaSlice";
 
 export default function Home() {
 	const navigate = useNavigate();
@@ -18,10 +18,9 @@ export default function Home() {
 	const isMounted = useRef(false);
 	const { categoryId, sort, currentPage } = useSelector((state) => state.filter);
 	const sortType = sort.sortProperty;
+	const { items, status } = useSelector((state) => state.pizza);
 
 	const { searchValue } = useContext(SearchContext);
-	const [items, setItems] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
 
 	const onChangeCategory = (id) => {
 		dispatch(setCategoryId(id));
@@ -31,22 +30,21 @@ export default function Home() {
 		dispatch(setCurrentPage(number));
 	};
 
-	const fetchPizzas = () => {
-		setIsLoading(true);
-
+	const getPizzas = async () => {
 		const order = sortType.includes("-") ? "asc" : "desc";
 		const sortBy = sortType.replace("-", "");
 		const category = categoryId > 0 ? `category=${categoryId}` : "";
 		const search = searchValue ? `&search=${searchValue}` : "";
 
-		axios
-			.get(
-				`https://6321da1dfd698dfa2900d447.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`,
-			)
-			.then((res) => {
-				setItems(res.data);
-				setIsLoading(false);
-			});
+		dispatch(
+			fetchPizzas({
+				order,
+				sortBy,
+				category,
+				search,
+				currentPage,
+			}),
+		);
 	};
 
 	useEffect(() => {
@@ -78,7 +76,7 @@ export default function Home() {
 	useEffect(() => {
 		window.scrollTo(0, 0);
 		if (!isSearch.current) {
-			fetchPizzas();
+			getPizzas();
 		}
 		isSearch.current = false;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -99,7 +97,17 @@ export default function Home() {
 				<Sort />
 			</div>
 			<h2 className="content__title">All pizzas</h2>
-			<div className="content__items">{isLoading ? skeletons : pizzas}</div>
+			{status === "error" ? (
+				<div className="content__error-info">
+					<h2>
+						Error occurred <icon>😕</icon>
+					</h2>
+					<p>Unable to get pizzas</p>
+				</div>
+			) : (
+				<div className="content__items">{status === "loading" ? skeletons : pizzas}</div>
+			)}
+
 			<Pagination currentPage={currentPage} onChangePage={onChangePage} />
 		</div>
 	);
