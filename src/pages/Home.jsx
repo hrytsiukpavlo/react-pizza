@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import qs from "qs";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
 	selectFilter,
@@ -87,7 +87,11 @@ export default function Home() {
 	const pizzas = items
 		.filter((obj) => obj.title.toLowerCase().includes(searchValue.toLowerCase()))
 		.map((obj) => {
-			return <PizzaBlock key={obj.id} {...obj} />;
+			return (
+				<Link key={obj.id} to={`/pizza/${obj.id}`}>
+					<PizzaBlock {...obj} />
+				</Link>
+			);
 		});
 
 	const skeletons = [...new Array(8)].map((_, index) => <Skeleton key={index} />);
