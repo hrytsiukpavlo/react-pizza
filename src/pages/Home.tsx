@@ -15,7 +15,7 @@ import Skeleton from "../components/PizzaBlock/Skeleton";
 import Pagination from "../components/Pagination";
 import { fetchPizzas, selectPizzaData } from "../redux/slices/pizzaSlice";
 
-export default function Home() {
+const Home: React.FC = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const isSearch = useRef(false);
@@ -24,12 +24,12 @@ export default function Home() {
 	const sortType = sort.sortProperty;
 	const { items, status } = useSelector(selectPizzaData);
 
-	const onChangeCategory = (id) => {
-		dispatch(setCategoryId(id));
+	const onChangeCategory = (idx: number) => {
+		dispatch(setCategoryId(idx));
 	};
 
-	const onChangePage = (number) => {
-		dispatch(setCurrentPage(number));
+	const onChangePage = (page: number) => {
+		dispatch(setCurrentPage(page));
 	};
 
 	const getPizzas = async () => {
@@ -39,6 +39,7 @@ export default function Home() {
 		const search = searchValue ? `&search=${searchValue}` : "";
 
 		dispatch(
+			// @ts-ignore
 			fetchPizzas({
 				order,
 				sortBy,
@@ -85,8 +86,8 @@ export default function Home() {
 	}, [categoryId, sortType, searchValue, currentPage]);
 
 	const pizzas = items
-		.filter((obj) => obj.title.toLowerCase().includes(searchValue.toLowerCase()))
-		.map((obj) => {
+		.filter((obj: any) => obj.title.toLowerCase().includes(searchValue.toLowerCase()))
+		.map((obj: any) => {
 			return (
 				<Link key={obj.id} to={`/pizza/${obj.id}`}>
 					<PizzaBlock {...obj} />
@@ -106,7 +107,7 @@ export default function Home() {
 			{status === "error" ? (
 				<div className="content__error-info">
 					<h2>
-						Error occurred <icon>😕</icon>
+						Error occurred <span>😕</span>
 					</h2>
 					<p>Unable to get pizzas</p>
 				</div>
@@ -117,4 +118,6 @@ export default function Home() {
 			<Pagination currentPage={currentPage} onChangePage={onChangePage} />
 		</div>
 	);
-}
+};
+
+export default Home;

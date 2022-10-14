@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./NotFoundBlock.module.scss";
 
-export default function NotFoundBlock() {
+const NotFoundBlock = () => {
 	return (
 		<h1 className={styles.root}>
 			<span>Oops...</span>
@@ -9,4 +9,6 @@ export default function NotFoundBlock() {
 			Nothing found :(
 		</h1>
 	);
-}
+};
+
+export default NotFoundBlock;
