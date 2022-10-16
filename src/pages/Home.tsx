@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import qs from "qs";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -26,9 +26,9 @@ const Home: React.FC = () => {
 	const sortType = sort.sortProperty;
 	const { items, status } = useSelector(selectPizzaData);
 
-	const onChangeCategory = (idx: number) => {
+	const onChangeCategory = useCallback((idx: number) => {
 		dispatch(setCategoryId(idx));
-	};
+	}, []);
 
 	const onChangePage = (page: number) => {
 		dispatch(setCurrentPage(page));
@@ -92,7 +92,7 @@ const Home: React.FC = () => {
 	const pizzas = items
 		.filter((obj: any) => obj.title.toLowerCase().includes(searchValue.toLowerCase()))
 		.map((obj: any) => {
-			return <PizzaBlock {...obj} />;
+			return <PizzaBlock key={obj.id} {...obj} />;
 		});
 
 	const skeletons = [...new Array(8)].map((_, index) => <Skeleton key={index} />);
@@ -101,7 +101,7 @@ const Home: React.FC = () => {
 		<div className="container">
 			<div className="content__top">
 				<Categories value={categoryId} onChangeCategory={onChangeCategory} />
-				<Sort />
+				<Sort value={sort} />
 			</div>
 			<h2 className="content__title">All pizzas</h2>
 			{status === "error" ? (
