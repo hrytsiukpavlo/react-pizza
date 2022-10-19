@@ -25,14 +25,14 @@ const FullPizza: React.FC = () => {
 		}
 
 		fetchPizza();
-	}, [id]);
+	}, [id, navigate]);
 
 	if (!pizza) {
 		return <>"Loading..."</>;
 	}
 
 	return (
-		<div className="container">
+		<div className="container fullPizza">
 			<img src={pizza.imageUrl} alt="pizza" />
 			<h2>{pizza.title}</h2>
 			<h4>{pizza.price}$</h4>

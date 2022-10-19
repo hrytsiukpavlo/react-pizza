@@ -97,6 +97,17 @@ body {
 	}
 }
 
+.fullPizza {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	button {
+		margin: 10px;
+	}
+}
+
 .cart {
 	&__top {
 		display: flex;
